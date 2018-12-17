@@ -40,8 +40,9 @@ RCT_EXPORT_METHOD(transactionPayment: (NSDictionary*)options resolver:(RCTPromis
                                                                                error:&error];
 
     if (error) {
-      reject(@"oppwa/card-init",error.description, error);
+      reject(@"oppwa/card-init",error.localizedDescription, error);
     } else {
+      params.tokenizationEnabled = YES;
       OPPTransaction *transaction = [OPPTransaction transactionWithPaymentParams:params];
 
       [provider submitTransaction:transaction completionHandler:^(OPPTransaction * _Nonnull transaction, NSError * _Nullable error) {
@@ -50,7 +51,7 @@ RCT_EXPORT_METHOD(transactionPayment: (NSDictionary*)options resolver:(RCTPromis
         }  else if (transaction.type == OPPTransactionTypeSynchronous) {
          resolve(transaction);
         } else {
-          reject(@"oppwa/transaction",error.description, error);
+          reject(@"oppwa/transaction",error.localizedDescription, error);
           // Handle the error
         }
       }];
@@ -61,15 +62,10 @@ RCT_EXPORT_METHOD(transactionPayment: (NSDictionary*)options resolver:(RCTPromis
  * @return
  */
 RCT_EXPORT_METHOD(isValidNumber:
-            options:
-            (NSDictionary *) options
-            resolver:
-            (RCTPromiseResolveBlock) resolve
-            rejecter:
-            (RCTPromiseRejectBlock) reject) {
+            (NSDictionary*)options resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
 
         
-        if (![OPPCardPaymentParams isNumberValid:[options valueForKey:@"cardNumber"] forPaymentBrand:[options valueForKey:@"paymentBrand"]]) {
+        if ([OPPCardPaymentParams isNumberValid:[options valueForKey:@"cardNumber"] forPaymentBrand:[options valueForKey:@"paymentBrand"]]) {
             resolve([NSNull null]);
         }
         else {
